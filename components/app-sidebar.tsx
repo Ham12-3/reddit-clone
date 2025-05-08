@@ -2,7 +2,6 @@ import * as React from "react";
 import Link from "next/link";
 import {
   FlameIcon,
-  GalleryVerticalEnd,
   HomeIcon,
   Minus,
   LinkIcon,
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { getSubreddits } from "@/sanity/lib/subreddit/getSubreddit";
+import CreateCommunityButton from "./header/CreateCommunityButton";
 
 type SidebarData = {
   navMain: {
@@ -91,7 +91,7 @@ export async function AppSidebar({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                {/* <CreateCommunityButton />  */}
+                <CreateCommunityButton />
               </SidebarMenuButton>
               <SidebarMenuButton asChild className="p-5">
                 <Link href="/">
