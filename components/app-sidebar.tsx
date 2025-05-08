@@ -1,10 +1,11 @@
 import * as React from "react";
+import Link from "next/link";
 import {
   FlameIcon,
   GalleryVerticalEnd,
   HomeIcon,
-  Link,
   Minus,
+  LinkIcon,
   Plus,
   TrendingUpIcon,
 } from "lucide-react";
