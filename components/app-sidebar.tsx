@@ -30,6 +30,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import { getSubreddits } from "@/sanity/lib/subreddit/getSubreddit";
 
 type SidebarData = {
   navMain: {
@@ -43,27 +44,30 @@ type SidebarData = {
   }[];
 };
 
-// This is sample data.
-const sidebarData: SidebarData = {
-  navMain: [
-    {
-      title: "Communities",
-      url: "#",
-      items: [
-        {
-          title: "Installation",
-          url: "#",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-        },
-      ],
-    },
-  ],
-};
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  // Move data fetching inside the component
+  const subreddits = await getSubreddits();
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Create sidebarData inside the component
+  const sidebarData: SidebarData = {
+    navMain: [
+      {
+        title: "Communities",
+        url: "#",
+        items:
+          subreddits
+            ?.filter((subreddit) => subreddit.title !== undefined)
+            .map((subreddit) => ({
+              title: subreddit.title!, // Now safe to use non-null assertion
+              url: `/community/${subreddit.slug}`,
+              isActive: false,
+            })) || [],
+      },
+    ],
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
