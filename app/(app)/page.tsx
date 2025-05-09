@@ -3,9 +3,29 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <h1>Hello WOrld</h1>
-      <Button variant={"outline"}></Button>
-    </div>
+    <>
+      {/* Banner section  */}
+      <section className="bg-white border-b">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="flex items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Home</h1>
+              <p className="text-sm text-gray-600">
+                Recent posts from all communities
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Post section  */}
+      <section className="my-8">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex flex-col gap-4">
+            <PostsList />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
