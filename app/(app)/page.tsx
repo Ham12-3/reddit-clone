@@ -1,3 +1,4 @@
+import PostsList from "@/components/post/PostsList";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 

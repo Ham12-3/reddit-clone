@@ -1,7 +1,7 @@
 "use server";
 
 import { addComment } from "@/sanity/lib/comment/addComment";
-import { getUser } from "@/sanity/lib/user/getuser";
+import { getUser } from "@/sanity/lib/user/getUser";
 
 export async function createComment(
   postId: string,

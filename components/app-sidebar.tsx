@@ -1,13 +1,5 @@
 import * as React from "react";
-import Link from "next/link";
-import {
-  FlameIcon,
-  HomeIcon,
-  Minus,
-  LinkIcon,
-  Plus,
-  TrendingUpIcon,
-} from "lucide-react";
+import { FlameIcon, HomeIcon, Minus, Plus, TrendingUpIcon } from "lucide-react";
 
 import { SearchForm } from "@/components/search-form";
 import {
@@ -29,17 +21,20 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
-import { getSubreddits } from "@/sanity/lib/subreddit/getSubreddit";
+import ReddishLogo from "@/images/Reddish Full.png";
+import Link from "next/link";
+
 import CreateCommunityButton from "./header/CreateCommunityButton";
+import { getSubreddits } from "@/sanity/lib/subreddit/getSubreddit";
 
 type SidebarData = {
   navMain: {
     title: string;
     url: string;
-    items?: {
+    items: {
       title: string;
       url: string;
-      isActive?: boolean;
+      isActive: boolean;
     }[];
   }[];
 };
@@ -47,23 +42,21 @@ type SidebarData = {
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  // Move data fetching inside the component
+  // TODO: get all subreddits from sanity
   const subreddits = await getSubreddits();
 
-  // Create sidebarData inside the component
+  // This is sample data.
   const sidebarData: SidebarData = {
     navMain: [
       {
         title: "Communities",
         url: "#",
         items:
-          subreddits
-            ?.filter((subreddit) => subreddit.title !== undefined)
-            .map((subreddit) => ({
-              title: subreddit.title!, // Now safe to use non-null assertion
-              url: `/community/${subreddit.slug}`,
-              isActive: false,
-            })) || [],
+          subreddits?.map((subreddit) => ({
+            title: subreddit.title || "unknown",
+            url: `/community/${subreddit.slug}`,
+            isActive: false,
+          })) || [],
       },
     ],
   };
@@ -74,13 +67,15 @@ export async function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Image
-                src="/images/Reddish Full.png"
-                alt="logo"
-                width={150}
-                height={150}
-                className="object-contain"
-              />
+              <Link href="/">
+                <Image
+                  src={ReddishLogo}
+                  alt="logo"
+                  width={150}
+                  height={150}
+                  className="object-contain"
+                />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -93,6 +88,7 @@ export async function AppSidebar({
               <SidebarMenuButton asChild>
                 <CreateCommunityButton />
               </SidebarMenuButton>
+
               <SidebarMenuButton asChild className="p-5">
                 <Link href="/">
                   <HomeIcon className="w-4 h-4 mr-2" />
@@ -106,7 +102,6 @@ export async function AppSidebar({
                   Popular
                 </Link>
               </SidebarMenuButton>
-
               <SidebarMenuButton asChild className="p-5">
                 <Link href="/hot">
                   <FlameIcon className="w-4 h-4 mr-2" />
@@ -116,6 +111,7 @@ export async function AppSidebar({
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
         <SidebarGroup>
           <SidebarMenu>
             {sidebarData.navMain.map((item, index) => (
@@ -141,7 +137,7 @@ export async function AppSidebar({
                               asChild
                               isActive={item.isActive}
                             >
-                              <a href={item.url}>{item.title}</a>
+                              <Link href={item.url}>{item.title}</Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}

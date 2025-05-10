@@ -1,8 +1,8 @@
 "use server";
 
-import { downvotePost } from "@/sanity/lib/vote/downvotePost";
-import { downvoteComment } from "@/sanity/lib/vote/downvoteComment";
-import { getUser } from "@/sanity/lib/user/getuser";
+import { getUser } from "@/sanity/lib/user/getUser";
+import { downvoteComment } from "@/sanity/lib/vote/downVoteComment";
+import { downvotePost } from "@/sanity/lib/vote/downVotePost";
 
 export async function downvote(
   contentId: string,
