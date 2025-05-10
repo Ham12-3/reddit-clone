@@ -58,6 +58,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.2",
     "react-resizable-panels": "^3.0.1",
+    "react-timeago": "^8.2.0",
     "recharts": "^2.15.3",
     "sanity": "^3.88.1",
     "sonner": "^2.0.3",

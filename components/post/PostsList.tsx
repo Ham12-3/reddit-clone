@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
-import Post from "./Post";
+
 import { getPosts } from "@/sanity/lib/post/getPosts";
+import Post from "./Post";
 
 async function PostsList() {
   const posts = await getPosts();

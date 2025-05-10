@@ -6,6 +6,14 @@ const nextConfig = {
   experimental: {
     // esmExternals: "loose", // This causes Turbopack to crash
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "cdn.sanity.io",
+        protocol: "https",
+      },
+    ],
+  },
 } as NextConfig;
 
 export default nextConfig;
