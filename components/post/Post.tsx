@@ -10,13 +10,14 @@ import { urlFor } from "@/sanity/lib/image";
 import { MessageSquare } from "lucide-react";
 
 import CommentList from "../comment/CommentList";
-import PostVoteButtons from "./PostVoteButtons";
+
 import ReportButton from "../ReportButton";
 import DeleteButton from "../DeleteButton";
 import { getUserPostVoteStatus } from "@/sanity/lib/vote/getUserPostVoteStatus";
 import { getPostComments } from "@/sanity/lib/vote/getPostComments";
 import TimeAgo from "../TimeAgo";
 import CommentInput from "../comment/CommentInput";
+import PostVoteButtons from "./PostVoteButtons";
 
 interface PostProps {
   post:
