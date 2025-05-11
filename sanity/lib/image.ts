@@ -1,11 +1,37 @@
-import createImageUrlBuilder from '@sanity/image-url'
-import { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import imageUrlBuilder from "@sanity/image-url";
+import { client } from "./client";
 
-import { dataset, projectId } from '../env'
+// Create a pre-configured url builder
+const builder = imageUrlBuilder(client);
 
-// https://www.sanity.io/docs/image-url
-const builder = createImageUrlBuilder({ projectId, dataset })
+// Export the urlFor function with better debugging
+export function urlFor(source: any) {
+  if (!source) {
+    console.warn("No image source provided to urlFor");
+    return {
+      url: () => "https://placehold.co/600x400?text=No+Image",
+    };
+  }
 
-export const urlFor = (source: SanityImageSource) => {
-  return builder.image(source)
+  // Handle the case where source might be in different formats
+  const validSource = source.asset?._ref || source.asset?.url ? source : null;
+
+  if (!validSource || !validSource.asset) {
+    console.warn("Invalid image structure:", source);
+    return {
+      url: () => "https://placehold.co/600x400?text=Invalid+Image+Structure",
+    };
+  }
+
+  try {
+    const url = builder.image(validSource);
+    const urlString = url.url();
+    console.log(`Generated image URL: ${urlString}`);
+    return url;
+  } catch (error) {
+    console.error("Error generating image URL:", error);
+    return {
+      url: () => "https://placehold.co/600x400?text=Error+Loading+Image",
+    };
+  }
 }

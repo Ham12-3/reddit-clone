@@ -55,6 +55,13 @@ function Post({ post, userId }: PostProps) {
     PostWithModeration;
   const isInappropriate = postWithModeration.isInappropriate;
 
+  // Add this at the beginning of your component:
+  useEffect(() => {
+    // Debug the post data
+    console.log(`Post ${post._id} complete data:`, post);
+    console.log(`Post ${post._id} image data:`, post.image);
+  }, [post]);
+
   // Fetch post data when component mounts
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +80,9 @@ function Post({ post, userId }: PostProps) {
 
     fetchComments();
   }, [post._id, userId]);
+
+  // Add near the top of your render function:
+  console.log(`Post ${post._id} image data:`, post.image);
 
   return (
     <article
@@ -131,13 +141,15 @@ function Post({ post, userId }: PostProps) {
             </div>
           )}
 
-          {post.image && post.image.asset?._ref && (
-            <div className="relative w-full h-64 mb-3 px-2 bg-gray-100/30 ">
+          {/* Update the image check to work with expanded assets */}
+          {post.image && (
+            <div className="relative w-full h-64 mb-3">
               <Image
                 src={urlFor(post.image).url()}
                 alt={post.image.alt || "Post image"}
                 fill
-                className="object-contain rounded-md p-2"
+                className="object-contain rounded-md"
+                unoptimized
               />
             </div>
           )}
@@ -209,19 +221,6 @@ function Post({ post, userId }: PostProps) {
           <div className="mt-2">{/* Post body rendering */}</div>
 
           {/* Post image with conditional blur */}
-          {post.image && (
-            <div
-              className={`mt-4 ${isInappropriate && !isRevealed ? "blur-md" : ""}`}
-            >
-              <Image
-                src={urlFor(post.image).url()}
-                alt="Post image"
-                width={600}
-                height={400}
-                className="rounded-md object-cover"
-              />
-            </div>
-          )}
         </div>
       </div>
 

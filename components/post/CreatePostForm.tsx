@@ -42,10 +42,23 @@ function CreatePostForm() {
     setIsLoading(true);
 
     try {
+      let imageData = null;
+      if (imageFile) {
+        const base64 = await convertFileToBase64(imageFile);
+        imageData = {
+          base64,
+          filename: imageFile.name,
+          contentType: imageFile.type,
+        };
+      }
+
       const result = await createPost({
         title: title.trim(),
         subredditSlug: subreddit,
         body: body.trim() || undefined,
+        imageBase64: imageData?.base64 || null,
+        imageFilename: imageData?.filename || null,
+        imageContentType: imageData?.contentType || null,
       });
 
       resetForm();
@@ -54,8 +67,6 @@ function CreatePostForm() {
       if ("error" in result && result.error) {
         setErrorMessage(result.error);
       } else {
-        // The post was created successfully, but subreddit is a reference, not expanded
-        // Just use the normalized version of the original slug for redirection
         const normalizedSlug = subreddit.toLowerCase().replace(/\s+/g, "-");
         router.push(`/community/${normalizedSlug}`);
       }
@@ -80,16 +91,19 @@ function CreatePostForm() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      setImageFile(null);
+      setImagePreview(null);
+      return;
     }
+
+    setImageFile(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
@@ -194,5 +208,14 @@ function CreatePostForm() {
     </div>
   );
 }
+
+const convertFileToBase64 = (file: File) => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 export default CreatePostForm;

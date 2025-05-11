@@ -60,57 +60,46 @@ export async function createPost({
     }
     console.log(`Found subreddit: ${subreddit._id}`);
 
-    // Prepare image data if provided
-    let imageAsset;
+    // Process image if provided
+    let imageAsset = null;
     if (imageBase64 && imageFilename && imageContentType) {
-      console.log(`Image provided: ${imageFilename} (${imageContentType})`);
-      console.log(`Image base64 length: ${imageBase64.length} characters`);
       try {
-        console.log("Processing image data...");
-        // Extract base64 data (remove data:image/jpeg;base64, part)
-        const base64Data = imageBase64.split(",")[1];
-        console.log(`Extracted base64 data (${base64Data.length} characters)`);
+        console.log("Processing image upload...");
+        // Strip out the base64 prefix if it exists
+        const base64WithoutPrefix = imageBase64.replace(
+          /^data:image\/\w+;base64,/,
+          ""
+        );
+        const imageBuffer = Buffer.from(base64WithoutPrefix, "base64");
 
-        // Convert base64 to buffer
-        const buffer = Buffer.from(base64Data, "base64");
-        console.log(`Converted to buffer (size: ${buffer.length} bytes)`);
-
-        // Upload to Sanity
-        console.log(`Uploading image to Sanity: ${imageFilename}`);
-        imageAsset = await adminClient.assets.upload("image", buffer, {
+        // Upload the image to Sanity
+        imageAsset = await adminClient.assets.upload("image", imageBuffer, {
           filename: imageFilename,
           contentType: imageContentType,
         });
-        console.log(`Image uploaded successfully with ID: ${imageAsset._id}`);
+
+        console.log("Image uploaded successfully with ID:", imageAsset._id);
       } catch (error) {
-        console.error("Error uploading image:", error);
-        console.log("Will continue post creation without image");
-        // Continue without image if upload fails
+        console.error("Failed to upload image:", error);
       }
-    } else {
-      console.log("No image provided with post");
     }
 
-    // Create the post
-    console.log("Preparing post document");
-    const postDoc: Partial<Post> = {
+    // Create the post document with the image reference if we have one
+    const postData = {
       _type: "post",
       title,
-      body: body
-        ? [
-            {
-              _type: "block",
-              _key: Date.now().toString(),
-              children: [
-                {
-                  _type: "span",
-                  _key: Date.now().toString() + "1",
-                  text: body,
-                },
-              ],
-            },
-          ]
-        : undefined,
+      body,
+      // Add image reference if we uploaded one
+      ...(imageAsset && {
+        image: {
+          _type: "image",
+          asset: {
+            _type: "reference",
+            _ref: imageAsset._id,
+          },
+        },
+      }),
+      publishedAt: new Date().toISOString(),
       author: {
         _type: "reference",
         _ref: user._id,
@@ -119,23 +108,10 @@ export async function createPost({
         _type: "reference",
         _ref: subreddit._id,
       },
-      publishedAt: new Date().toISOString(),
     };
 
-    // Add image if available
-    if (imageAsset) {
-      console.log(`Adding image reference to post: ${imageAsset._id}`);
-      postDoc.image = {
-        _type: "image",
-        asset: {
-          _type: "reference",
-          _ref: imageAsset._id,
-        },
-      };
-    }
+    const post = await adminClient.create(postData);
 
-    console.log("Creating post in Sanity database");
-    const post = await adminClient.create(postDoc as Post);
     console.log(`Post created successfully with ID: ${post._id}`);
 
     // Call the content moderation API

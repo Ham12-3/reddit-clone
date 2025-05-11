@@ -4,111 +4,103 @@ import { sanityFetch } from "../live";
 import { adminClient } from "../adminClient";
 import { Subreddit } from "@/sanity.types";
 
+// Helper function to generate slug
+function generateSlug(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]/g, "")
+    .slice(0, 50);
+}
+
+// Define the type for the Sanity document
+interface SubredditData {
+  _type: string;
+  title: string;
+  slug: {
+    _type: string;
+    current: string;
+  };
+  description?: string;
+  moderator: {
+    _type: string;
+    _ref: string;
+  };
+  createdAt: string;
+  image?: {
+    _type: string;
+    asset: {
+      _type: string;
+      _ref: string;
+    };
+  };
+}
+
 export async function createSubreddit(
   name: string,
-  moderatorId: string,
-  imageData: ImageData | null,
-  customSlug?: string,
-  customDescription?: string
+  userId: string,
+  imageData: ImageData,
+  slug?: string,
+  description?: string
 ) {
-  console.log(`Creating subreddit: ${name} with moderator: ${moderatorId}`);
-
   try {
-    // Check if subreddit with this name already exists
-    const checkExistingQuery = defineQuery(`
-        *[_type == "subreddit" && title == $name][0] {
-          _id
-        }
-      `);
+    console.log("Creating subreddit with imageData:", imageData);
 
-    const existingSubreddit = await sanityFetch({
-      query: checkExistingQuery,
-      params: { name },
-    });
+    // First, upload the image separately if provided
+    let imageAssetId = null;
+    if (imageData && imageData.base64) {
+      // Remove data URL prefix (e.g., "data:image/png;base64,")
+      const base64Data = imageData.base64.split(",")[1] || imageData.base64;
 
-    if (existingSubreddit.data) {
-      console.log(`Subreddit "${name}" already exists`);
-      return { error: "A subreddit with this name already exists" };
-    }
-
-    // Check if slug already exists if custom slug is provided
-    if (customSlug) {
-      const checkSlugQuery = defineQuery(`
-          *[_type == "subreddit" && slug.current == $slug][0] {
-            _id
-          }
-        `);
-
-      const existingSlug = await sanityFetch({
-        query: checkSlugQuery,
-        params: { slug: customSlug },
-      });
-
-      if (existingSlug.data) {
-        console.log(`Subreddit with slug "${customSlug}" already exists`);
-        return { error: "A subreddit with this URL already exists" };
-      }
-    }
-
-    // Create slug from name or use custom slug
-    const slug = customSlug || name.toLowerCase().replace(/\s+/g, "-");
-
-    // Upload image if provided
-    let imageAsset;
-    if (imageData) {
       try {
-        // Extract base64 data (remove data:image/jpeg;base64, part)
-        const base64Data = imageData.base64.split(",")[1];
+        const imageAsset = await adminClient.assets.upload(
+          "image",
+          Buffer.from(base64Data, "base64"),
+          {
+            filename: imageData.filename,
+            contentType: imageData.contentType,
+          }
+        );
 
-        // Convert base64 to buffer
-        const buffer = Buffer.from(base64Data, "base64");
-
-        // Upload to Sanity
-        imageAsset = await adminClient.assets.upload("image", buffer, {
-          filename: imageData.filename,
-          contentType: imageData.contentType,
-        });
-
-        console.log("Image asset:", imageAsset);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        // Continue without image if upload fails
+        console.log("Image uploaded successfully:", imageAsset._id);
+        imageAssetId = imageAsset._id;
+      } catch (imageError) {
+        console.error("Failed to upload image:", imageError);
       }
     }
 
-    // Create the subreddit
-    const subredditDoc: Partial<Subreddit> = {
+    // Then create the subreddit document with all properties included
+    const subredditData: SubredditData = {
       _type: "subreddit",
       title: name,
-      description: customDescription || `Welcome to r/${name}!`,
       slug: {
-        current: slug,
         _type: "slug",
+        current: slug || generateSlug(name),
       },
+      description,
       moderator: {
         _type: "reference",
-        _ref: moderatorId,
+        _ref: userId,
       },
       createdAt: new Date().toISOString(),
+      // Conditionally include the image
+      ...(imageAssetId && {
+        image: {
+          _type: "image",
+          asset: {
+            _type: "reference",
+            _ref: imageAssetId,
+          },
+        },
+      }),
     };
 
-    // Add image if available
-    if (imageAsset) {
-      subredditDoc.image = {
-        _type: "image",
-        asset: {
-          _type: "reference",
-          _ref: imageAsset._id,
-        },
-      };
-    }
-
-    const subreddit = await adminClient.create(subredditDoc as Subreddit);
-    console.log(`Subreddit created successfully with ID: ${subreddit._id}`);
+    const subreddit = await adminClient.create(subredditData);
+    console.log("Created subreddit:", subreddit);
 
     return { subreddit };
   } catch (error) {
-    console.error("Error creating subreddit:", error);
+    console.error("Error in createSubreddit:", error);
     return { error: "Failed to create subreddit" };
   }
 }

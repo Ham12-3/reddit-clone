@@ -1,15 +1,17 @@
 import { NextConfig } from "next";
 
 const nextConfig = {
-  // Images configuration removed since you no longer need those domains
-  // Remove incompatible experimental features
   experimental: {
-    // esmExternals: "loose", // This causes Turbopack to crash
+    // esmExternals: "loose" removed as noted
   },
   images: {
     remotePatterns: [
       {
         hostname: "cdn.sanity.io",
+        protocol: "https",
+      },
+      {
+        hostname: "*.sanity.io", // Wildcard to catch all subdomains
         protocol: "https",
       },
       {

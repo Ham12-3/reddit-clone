@@ -11,12 +11,17 @@ async function CommunityPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  console.log("Requesting community with slug:", slug);
 
   const community = await getSubredditBySlug(slug);
+  console.log("Community data:", JSON.stringify(community, null, 2));
   if (!community) return null;
 
   const user = await currentUser();
   const posts = await getPostsForSubreddit(community._id);
+
+  // Add this logging:
+  console.log("Community image:", community?.image);
 
   return (
     <>
@@ -24,17 +29,22 @@ async function CommunityPage({
       <section className="bg-white border-b">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex items-center gap-4">
-            {community?.image && community.image.asset?._ref && (
+            {community?.image ? (
               <div className="relative h-16 w-16 overflow-hidden rounded-full border">
                 <Image
                   src={urlFor(community.image).url()}
-                  alt={
-                    community.image.alt || `${community.title} community icon`
-                  }
+                  alt={`${community.title} community icon`}
                   fill
                   className="object-contain"
                   priority
+                  unoptimized
                 />
+              </div>
+            ) : (
+              <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-xl font-bold text-gray-500">
+                  {community?.title?.charAt(0).toUpperCase() || "C"}
+                </span>
               </div>
             )}
             <div>

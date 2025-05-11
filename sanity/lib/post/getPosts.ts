@@ -11,7 +11,14 @@ export async function getPosts() {
     publishedAt,
     "author": author->,
     "subreddit": subreddit->,
-    image,
+    image {
+      _type,
+      asset->{
+        _id,
+        url
+      },
+      alt
+    },
     isDeleted,
     isInappropriate,
     moderationReason
