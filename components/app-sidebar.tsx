@@ -21,7 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
-import ReddishLogo from "@/images/Reddish Full.png";
+import ReddishLogo from "@/public/images/Reddish Full.png";
 import Link from "next/link";
 
 import CreateCommunityButton from "./header/CreateCommunityButton";

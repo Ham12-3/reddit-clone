@@ -11,14 +11,16 @@ function CreatePost() {
   const { user } = useUser();
 
   const handleCreatePost = () => {
-    // Extract the community name from the pathname if it follows the pattern /community/[name]
-    const communityName = pathname.includes("/community/")
+    // Extract the community slug directly from the pathname
+    // This will already be in the correct format as it appears in the URL
+    const communitySlug = pathname.includes("/community/")
       ? pathname.split("/community/")[1]
       : null;
 
     // If we're in a community, redirect to create post with that community pre-selected
-    if (communityName) {
-      router.push(`/create-post?subreddit=${communityName}`);
+    if (communitySlug) {
+      // Use the slug directly from the URL - it's already formatted correctly!
+      router.push(`/create-post?subreddit=${communitySlug}`);
     } else {
       // Otherwise just go to the create post page
       router.push("/create-post");

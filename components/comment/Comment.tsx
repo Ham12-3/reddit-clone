@@ -1,19 +1,19 @@
+"use client";
+
 import {
   GetCommentRepliesQueryResult,
   GetPostCommentsQueryResult,
 } from "@/sanity.types";
-
 import { UserCircle } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TimeAgo from "../TimeAgo";
 import CommentList from "./CommentList";
-
 import CommentReply from "./CommentReply";
-import { getCommentReplies } from "@/sanity/lib/comment/getCommentReplies";
 import PostVoteButtons from "../post/PostVoteButtons";
+import { getCommentRepliesAction } from "@/action/getCommentData";
 
-async function Comment({
+function Comment({
   postId,
   comment,
   userId,
@@ -24,8 +24,26 @@ async function Comment({
     | GetCommentRepliesQueryResult[number];
   userId: string | null;
 }) {
-  const replies = await getCommentReplies(comment._id, userId);
-  const userVoteStatus = comment.votes.voteStatus;
+  // Add type annotation to useState
+  const [replies, setReplies] = useState<GetCommentRepliesQueryResult>([]);
+  // Convert vote status to match expected format in PostVoteButtons
+  let userVoteStatus: "up" | "down" | null = null;
+
+  if (comment.votes?.voteStatus === "upvote") {
+    userVoteStatus = "up";
+  } else if (comment.votes?.voteStatus === "downvote") {
+    userVoteStatus = "down";
+  }
+
+  useEffect(() => {
+    // Fetch replies using server action
+    async function fetchReplies() {
+      const data = await getCommentRepliesAction(comment._id, userId);
+      setReplies(data);
+    }
+
+    fetchReplies();
+  }, [comment._id, userId]);
 
   return (
     <article className="py-5 border-b border-gray-100 last:border-0">
@@ -33,7 +51,7 @@ async function Comment({
         <PostVoteButtons
           contentId={comment._id}
           votes={comment.votes}
-          vote={userVoteStatus}
+          vote={userVoteStatus} // Now correctly typed
           contentType="comment"
         />
 

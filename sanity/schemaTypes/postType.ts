@@ -67,6 +67,19 @@ export const postType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: "isInappropriate",
+      title: "Is Inappropriate",
+      type: "boolean",
+      description: "Indicates if this post contains inappropriate content",
+      initialValue: false,
+    }),
+    defineField({
+      name: "moderationReason",
+      title: "Moderation Reason",
+      type: "string",
+      description: "Reason why the post was flagged as inappropriate",
+    }),
+    defineField({
       name: "publishedAt",
       title: "Published At",
       type: "datetime",

@@ -42,27 +42,10 @@ function CreatePostForm() {
     setIsLoading(true);
 
     try {
-      let imageBase64: string | null = null;
-      let fileName: string | null = null;
-      let fileType: string | null = null;
-
-      if (imageFile) {
-        const reader = new FileReader();
-        imageBase64 = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(imageFile);
-        });
-        fileName = imageFile.name;
-        fileType = imageFile.type;
-      }
-
       const result = await createPost({
         title: title.trim(),
         subredditSlug: subreddit,
         body: body.trim() || undefined,
-        imageBase64: imageBase64,
-        imageFilename: fileName,
-        imageContentType: fileType,
       });
 
       resetForm();
@@ -71,7 +54,10 @@ function CreatePostForm() {
       if ("error" in result && result.error) {
         setErrorMessage(result.error);
       } else {
-        router.push(`/community/${subreddit}`);
+        // The post was created successfully, but subreddit is a reference, not expanded
+        // Just use the normalized version of the original slug for redirection
+        const normalizedSlug = subreddit.toLowerCase().replace(/\s+/g, "-");
+        router.push(`/community/${normalizedSlug}`);
       }
     } catch (err) {
       console.error("Failed to create post", err);

@@ -1,10 +1,12 @@
+"use client";
+
 import {
   GetCommentRepliesQueryResult,
   GetPostCommentsQueryResult,
 } from "@/sanity.types";
 import Comment from "./Comment";
 
-async function CommentList({
+function CommentList({
   postId,
   comments,
   userId,

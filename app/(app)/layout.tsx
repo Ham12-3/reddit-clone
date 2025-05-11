@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "THe Reddish Clone",
+  title: "The Reddish Clone",
   description: "This is the reddis clone on youtube",
 };
 

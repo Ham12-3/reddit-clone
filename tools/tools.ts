@@ -3,66 +3,42 @@ import { z } from "zod";
 import { tool } from "ai";
 
 export const censorPost = tool({
-  description: "Censor inappropriate content in post title and body",
+  description: "Mark inappropriate content without changing the original text",
   parameters: z.object({
-    postId: z.string().describe("The ID of the post to censor"),
-    title: z.string().optional().describe("Censored version of the title"),
-    body: z.string().optional().describe("Censored version of the body"),
-    isToBeReported: z
+    postId: z.string().describe("The ID of the post to mark"),
+    isInappropriate: z
       .boolean()
+      .describe("Whether this post contains inappropriate content"),
+    reason: z
+      .string()
       .optional()
-      .describe(
-        "If the post contains prohibited content, return true, otherwise return false"
-      ),
+      .describe("The reason this content is flagged"),
   }),
-  execute: async ({ postId, title, body, isToBeReported }) => {
-    if (!isToBeReported) {
-      console.log(`>>>>>> Post ${postId} is not reported`);
+  execute: async ({ postId, isInappropriate, reason }) => {
+    console.log(
+      `>>>>>> Processing post ${postId}, inappropriate: ${isInappropriate}`
+    );
+
+    if (!isInappropriate) {
       return {
         success: true,
-        message: `Post ${postId} is not reported`,
+        message: `Post ${postId} is appropriate and visible`,
       };
     }
 
-    console.log(`>>>>>> Censoring content in post ${postId}`);
-
+    // Instead of censoring, just mark the post as inappropriate
     const patch = adminClient.patch(postId);
-
-    if (title) {
-      console.log(`>>>>>> Censoring title: ${title}`);
-      patch.set({ title });
-    }
-
-    if (body) {
-      console.log(`>>>>>> Censoring body: ${body}`);
-      // Convert body to Portable Text format
-      const portableTextBody = [
-        {
-          _type: "block",
-          _key: Date.now().toString(),
-          children: [
-            {
-              _type: "span",
-              _key: Date.now().toString() + "1",
-              text: body,
-            },
-          ],
-        },
-      ];
-      patch.set({ body: portableTextBody });
-    }
-
-    if (isToBeReported) {
-      console.log(`>>>>>> Reporting post ${postId}`);
-      patch.set({ isReported: true });
-    }
-
+    patch.set({
+      isInappropriate: true,
+      moderationReason: reason || "Contains sensitive content",
+      isReported: true, // Keep this for consistency
+    });
     await patch.commit();
 
     return {
       postId,
-      censored: true,
-      message: "Content has been censored",
+      success: true,
+      message: "Content has been marked as sensitive but preserved",
     };
   },
 });

@@ -2,8 +2,8 @@
 
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "../ui/button";
-import ReddishLogo from "@/images/Reddish Full.png";
-import ReddishLogoOnly from "@/images/Reddish Logo Only.png";
+import ReddishLogo from "@/public/images/Reddish Full.png";
+import ReddishLogoOnly from "@/public/images/Reddish Logo Only.png";
 import { ChevronLeftIcon, MenuIcon } from "lucide-react";
 import Image from "next/image";
 import { useSidebar } from "../ui/sidebar";
