@@ -28,7 +28,11 @@ function CreatePost() {
   };
 
   return (
-    <Button onClick={handleCreatePost} disabled={!user}>
+    <Button
+      onClick={handleCreatePost}
+      disabled={!user}
+      className="bg-red-600 hover:bg-red-700"
+    >
       <Plus className="w-4 h-4 mr-2" />
       {user ? "Create Post" : "Sign in to create post"}
     </Button>
